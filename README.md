@@ -159,3 +159,7 @@ Junto a cada opción se ve el número de votos en tiempo real. El menú de votac
 ## Créditos
 
 El menú WASD y la lectura de colecciones de Workshop parten de [SimpleRTV-CS2](https://github.com/josesilvaruiz/SimpleRTV-CS2).
+
+## Licencia
+
+[MIT](LICENSE)
