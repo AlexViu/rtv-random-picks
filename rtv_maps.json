@@ -1,0 +1,5 @@
+{
+  "de_dust2":  { "ws": false, "display": "Dust 2",    "mapid": "" },
+  "de_mirage": { "ws": false, "display": "Mirage",    "mapid": "" },
+  "mg_mymap":  { "ws": true,  "display": "My WS Map", "mapid": "1234567890" }
+}
