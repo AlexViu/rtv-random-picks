@@ -10,6 +10,7 @@ namespace RtvRandomPicks;
 public class WasdMenuManager
 {
     private const int VisibleOptions = 6;
+    private const int MaxNameLength = 30;
 
     private class OpenMenuState
     {
@@ -118,10 +119,15 @@ public class WasdMenuManager
             var option = options[i];
             string count = option.Count > 0 ? $" <font color='#88ff88'>({option.Count})</font>" : "";
 
+            // The center panel has a fixed size: a name that wraps pushes the key hints out of view
+            string name = option.Display.Length > MaxNameLength
+                ? option.Display[..(MaxNameLength - 1)].TrimEnd() + "…"
+                : option.Display;
+
             if (i == state.Selected)
-                sb.Append($"<font color='yellow'>►[</font> <font color='#9acd32' class='fontSize-m'>{option.Display}</font>{count} <font color='yellow'>]◄</font><br>");
+                sb.Append($"<font color='yellow'>►[</font> <font color='#9acd32' class='fontSize-sm'>{name}</font>{count} <font color='yellow'>]◄</font><br>");
             else
-                sb.Append($"<font color='white' class='fontSize-m'>{option.Display}</font>{count}<br>");
+                sb.Append($"<font color='white' class='fontSize-sm'>{name}</font>{count}<br>");
         }
 
         if (last < options.Count)

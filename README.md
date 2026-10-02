@@ -137,6 +137,7 @@ Edita `configs/plugins/RtvRandomPicks/RtvRandomPicks.json` y cambia de mapa para
 | Comando | Permiso | Descripción |
 |---|---|---|
 | `css_forcertv` (`!forcertv`) | `@css/changemap` | Abrir una votación de mapa ya |
+| `css_rtv_maps` | `@css/changemap` | Ver cuántos mapas hay cargados, la colección en uso y la ruta del `rtv_maps.json` |
 
 **Menú de votación**
 

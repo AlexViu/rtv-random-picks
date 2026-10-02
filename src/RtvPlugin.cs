@@ -8,6 +8,7 @@ using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Timers;
 using CounterStrikeSharp.API.Modules.Utils;
+using Microsoft.Extensions.Logging;
 using Timer = CounterStrikeSharp.API.Modules.Timers.Timer;
 
 namespace RtvRandomPicks;
@@ -240,7 +241,10 @@ public class RtvPlugin : BasePlugin, IPluginConfig<RtvConfig>
 
         if (matches.Count == 0)
         {
-            PrintToPlayer(player, "nominate.not_found", filter);
+            if (filter == "")
+                PrintToPlayer(player, "vote.no_maps");
+            else
+                PrintToPlayer(player, "nominate.not_found", filter);
             return;
         }
         if (matches.Count == 1 && filter != "")
@@ -476,17 +480,52 @@ public class RtvPlugin : BasePlugin, IPluginConfig<RtvConfig>
 
     private void FetchWorkshopMaps()
     {
-        string collectionId = Config.WorkshopCollectionId != ""
-            ? Config.WorkshopCollectionId
-            : ConVar.Find("host_workshop_collection")?.StringValue ?? "";
-        if (collectionId is "" or "0") return;
+        string collectionId = WorkshopCollectionId();
+        if (collectionId == "")
+        {
+            if (_maps.Maps.Count == 0)
+                Logger.LogWarning("[RTV] No maps: {File} is missing or empty and no workshop collection was found. " +
+                                  "Set WorkshopCollectionId in the config or start the server with +host_workshop_collection <id>.",
+                    Config.MapsFile);
+            return;
+        }
 
         string cachePath = Path.Combine(ConfigDirectory, "workshop_cache.json");
         _workshop.GetMapsAsync(collectionId, cachePath, Config.WorkshopCacheHours).ContinueWith(t =>
         {
-            if (t.IsCompletedSuccessfully && t.Result.Count > 0)
-                Server.NextFrame(() => _maps.MergeWorkshopMaps(t.Result));
+            if (!t.IsCompletedSuccessfully) return;
+            Server.NextFrame(() =>
+            {
+                _maps.MergeWorkshopMaps(t.Result);
+                Logger.LogInformation("[RTV] Workshop collection {Id}: {Count} maps. Map list now has {Total} maps.",
+                    collectionId, t.Result.Count, _maps.Maps.Count);
+            });
         });
+    }
+
+    private string WorkshopCollectionId()
+    {
+        if (Config.WorkshopCollectionId != "") return Config.WorkshopCollectionId;
+
+        string? id = ConVar.Find("host_workshop_collection")?.StringValue;
+
+        // Not always exposed as a convar: fall back to the server's launch options
+        if (string.IsNullOrEmpty(id) || id == "0")
+        {
+            var args = Environment.GetCommandLineArgs();
+            int i = Array.FindIndex(args, a => a.Equals("+host_workshop_collection", StringComparison.OrdinalIgnoreCase));
+            id = i >= 0 && i + 1 < args.Length ? args[i + 1] : "";
+        }
+
+        return id.All(char.IsDigit) && id != "0" ? id : "";
+    }
+
+    [ConsoleCommand("css_rtv_maps", "Show where the RTV map list comes from")]
+    [RequiresPermissions("@css/changemap")]
+    public void OnMapsCommand(CCSPlayerController? caller, CommandInfo info)
+    {
+        string collectionId = WorkshopCollectionId();
+        info.ReplyToCommand($"[RTV] {_maps.Maps.Count} maps. Workshop collection: {(collectionId == "" ? "none" : collectionId)}. Maps file: {Path.Combine(ConfigDirectory, Config.MapsFile)}");
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
