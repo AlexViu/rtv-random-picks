@@ -42,6 +42,9 @@ public class RtvPlugin : BasePlugin, IPluginConfig<RtvConfig>
     // Seconds played on this map. Only counts while there are players, so an empty
     // server never runs out its timelimit.
     private int _elapsed;
+
+    // The map timelimit in minutes, taken over from mp_timelimit (see TakeOverTimeLimit).
+    private float _timeLimitMinutes;
     private int _rtvAllowedAt;
     private bool _endVoteDone;
     private int _extends;
@@ -84,6 +87,9 @@ public class RtvPlugin : BasePlugin, IPluginConfig<RtvConfig>
         _extends = 0;
         _nextMap = null;
         _changing = false;
+        // _timeLimitMinutes is kept from the previous map (without its extensions, see ScheduleChange)
+        // in case no config sets mp_timelimit again on this one.
+        TakeOverTimeLimit();
 
         _maps.Load(Path.Combine(ConfigDirectory, Config.MapsFile));
         AddTimer(3f, FetchWorkshopMaps, TimerFlags.STOP_ON_MAPCHANGE);
@@ -94,6 +100,7 @@ public class RtvPlugin : BasePlugin, IPluginConfig<RtvConfig>
 
     private void OnSecond()
     {
+        TakeOverTimeLimit();
         if (!Humans().Any()) return;
         _elapsed++;
 
@@ -470,11 +477,25 @@ public class RtvPlugin : BasePlugin, IPluginConfig<RtvConfig>
             PrintToPlayer(player, "timeleft.next_map", _maps.DisplayName(_nextMap));
     }
 
-    private static float TimeLimitSeconds() =>
-        (ConVar.Find("mp_timelimit")?.GetPrimitiveValue<float>() ?? 0f) * 60f;
+    private float TimeLimitSeconds() => _timeLimitMinutes * 60f;
 
-    private static void SetTimeLimit(float minutes) =>
-        Server.ExecuteCommand($"mp_timelimit {minutes.ToString(CultureInfo.InvariantCulture)}");
+    private void SetTimeLimit(float minutes) => _timeLimitMinutes = Math.Max(0f, minutes);
+
+    // The plugin runs the timelimit itself (_elapsed only counts while there are players), so the
+    // engine's own mp_timelimit is moved into _timeLimitMinutes and set to 0. Otherwise the engine
+    // keeps its own clock while the server is empty; when it runs out and a player joins, CS2 ends
+    // the map with "changelevel" and an empty map name for workshop maps ("Changelevel ()"), which
+    // leaves the server on a map that never loads. Server and map configs set mp_timelimit again on
+    // every map load, so this runs at map start and every second.
+    private void TakeOverTimeLimit()
+    {
+        var cvar = ConVar.Find("mp_timelimit");
+        if (cvar == null) return;
+        float minutes = cvar.GetPrimitiveValue<float>();
+        if (minutes <= 0) return;
+        _timeLimitMinutes = minutes + _extends * Config.ExtendMinutes;
+        cvar.SetValue(0f);
+    }
 
     // ── Workshop collection ───────────────────────────────────────────────────
 
