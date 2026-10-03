@@ -18,7 +18,7 @@ Otros detalles:
 - Si nadie vota, se mantiene el mapa. En la votación de fin de mapa, al agotarse el tiempo se elige uno al azar.
 - La votación termina en cuanto han votado todos los jugadores.
 - Si se completa un RTV cuando la votación de fin de mapa ya eligió mapa, se cambia directamente a ese mapa.
-- El tiempo del mapa solo corre mientras hay jugadores: un servidor vacío no vota ni cambia de mapa.
+- El tiempo del mapa corre aunque el servidor esté vacío: al acabarse cambia a un mapa aleatorio (con jugadores se hace la votación de fin de mapa como siempre). Para que funcione con el servidor vacío pon `sv_hibernate_when_empty 0`.
 
 ## Requisitos
 

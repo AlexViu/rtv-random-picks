@@ -16,7 +16,7 @@ namespace RtvRandomPicks;
 public class RtvPlugin : BasePlugin, IPluginConfig<RtvConfig>
 {
     public override string ModuleName => "RtvRandomPicks";
-    public override string ModuleVersion => "1.0.0";
+    public override string ModuleVersion => "1.0.1";
     public override string ModuleDescription => "Classic Rock The Vote: random map picks, nominations and end-of-map vote";
 
     public RtvConfig Config { get; set; } = new();
@@ -39,8 +39,8 @@ public class RtvPlugin : BasePlugin, IPluginConfig<RtvConfig>
     private readonly HashSet<int> _voted = new();
     private Timer? _voteTimer;
 
-    // Seconds played on this map. Only counts while there are players, so an empty
-    // server never runs out its timelimit.
+    // Seconds since this map started. Also counts on an empty server, so the map still
+    // changes when its timelimit runs out (see OnSecond).
     private int _elapsed;
     private int _rtvAllowedAt;
     private bool _endVoteDone;
@@ -94,10 +94,13 @@ public class RtvPlugin : BasePlugin, IPluginConfig<RtvConfig>
 
     private void OnSecond()
     {
-        if (!Humans().Any()) return;
+        // Counts on an empty server too. CS2 keeps its own mp_timelimit clock running while the
+        // server is empty, and when it runs out it ends the map with an empty "changelevel" for
+        // workshop maps, leaving the server on a map that never loads. Changing to a random map
+        // ourselves when the time is up gets there first.
         _elapsed++;
 
-        if (_changing || _voteInProgress || Config.EndVoteSecondsBeforeEnd <= 0) return;
+        if (_changing || _voteInProgress) return;
 
         float limit = TimeLimitSeconds();
         if (limit <= 0) return;
@@ -105,7 +108,8 @@ public class RtvPlugin : BasePlugin, IPluginConfig<RtvConfig>
         float remaining = limit - _elapsed;
         if (remaining <= 0)
             ChangeOnTimeUp();
-        else if (!_endVoteDone && remaining <= Math.Max(Config.EndVoteSecondsBeforeEnd, Config.VoteSeconds + 10))
+        else if (!_endVoteDone && Config.EndVoteSecondsBeforeEnd > 0 && Humans().Any() &&
+                 remaining <= Math.Max(Config.EndVoteSecondsBeforeEnd, Config.VoteSeconds + 10))
             StartVote(endOfMap: true);
     }
 
