@@ -60,12 +60,23 @@ public class RtvPlugin : BasePlugin, IPluginConfig<RtvConfig>
 
         RegisterListener<Listeners.OnMapStart>(_ => StartMap(Config.RtvDelaySeconds));
         RegisterListener<Listeners.OnClientDisconnectPost>(OnClientDisconnect);
-        RegisterListener<Listeners.OnTick>(_menu.OnTick);
         RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
         AddCommandListener("say", OnSay);
         AddCommandListener("say_team", OnSay);
 
-        if (hotReload) StartMap(rtvDelay: 0);
+        if (hotReload)
+        {
+            // OnAllPluginsLoaded doesn't fire on hot reload
+            RegisterListener<Listeners.OnTick>(_menu.OnTick);
+            StartMap(rtvDelay: 0);
+        }
+    }
+
+    public override void OnAllPluginsLoaded(bool hotReload)
+    {
+        // Registered after every plugin has loaded so the menu's OnTick runs last and its
+        // PrintToCenterHtml isn't overwritten by other center-screen HUDs (e.g. SharpTimer)
+        if (!hotReload) RegisterListener<Listeners.OnTick>(_menu.OnTick);
     }
 
     public override void Unload(bool hotReload) => _menu.CloseAll();
