@@ -97,6 +97,7 @@ public class RtvPlugin : BasePlugin, IPluginConfig<RtvConfig>
         _changing = false;
 
         _maps.Load(Path.Combine(ConfigDirectory, Config.MapsFile));
+        _maps.RemoveExcluded(Config.ExcludedMaps);
         AddTimer(3f, FetchWorkshopMaps, TimerFlags.STOP_ON_MAPCHANGE);
         AddTimer(1f, OnSecond, TimerFlags.REPEAT | TimerFlags.STOP_ON_MAPCHANGE);
     }
@@ -512,6 +513,7 @@ public class RtvPlugin : BasePlugin, IPluginConfig<RtvConfig>
             Server.NextFrame(() =>
             {
                 _maps.MergeWorkshopMaps(t.Result);
+                _maps.RemoveExcluded(Config.ExcludedMaps);
                 Logger.LogInformation("[RTV] Workshop collection {Id}: {Count} maps. Map list now has {Total} maps.",
                     collectionId, t.Result.Count, _maps.Maps.Count);
             });

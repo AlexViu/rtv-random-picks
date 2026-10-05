@@ -41,6 +41,17 @@ public class MapService
                 _maps.TryAdd(kv.Key, kv.Value);
     }
 
+    /// <summary>Drops maps whose key, display name or workshop id is in the list.</summary>
+    public void RemoveExcluded(IReadOnlyCollection<string> excluded)
+    {
+        if (excluded.Count == 0) return;
+
+        var set = excluded.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var kv in _maps.ToList())
+            if (set.Contains(kv.Key) || set.Contains(kv.Value.Display) || set.Contains(kv.Value.MapId))
+                _maps.Remove(kv.Key);
+    }
+
     public string DisplayName(string key) =>
         _maps.TryGetValue(key, out var info) && info.Display != "" ? info.Display : key;
 

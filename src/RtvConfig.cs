@@ -50,4 +50,9 @@ public class RtvConfig : BasePluginConfig
 
     [JsonPropertyName("WorkshopCacheHours")]
     public int WorkshopCacheHours { get; set; } = 24;
+
+    /// <summary>Maps left out of RTV, nominations and votes (map name, display name or workshop id),
+    /// e.g. collection maps that should only be played when an admin changes to them.</summary>
+    [JsonPropertyName("ExcludedMaps")]
+    public List<string> ExcludedMaps { get; set; } = [];
 }

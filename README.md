@@ -119,6 +119,7 @@ Edita `configs/plugins/RtvRandomPicks/RtvRandomPicks.json` y cambia de mapa para
 | `MapsFile` | `rtv_maps.json` | Lista estática de mapas |
 | `WorkshopCollectionId` | `""` | Colección de Workshop (vacío = `host_workshop_collection`) |
 | `WorkshopCacheHours` | `24` | Horas de validez de la caché de la colección |
+| `ExcludedMaps` | `[]` | Mapas que no salen en RTV, nominaciones ni votaciones (nombre, nombre visible o ID de workshop), p. ej. mapas de la colección que solo pone un admin a mano |
 
 ### 6. Usarlo en el juego
 
