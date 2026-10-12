@@ -16,6 +16,9 @@ public class WasdMenu
     public string Title { get; }
     public List<WasdMenuOption> Options { get; } = new();
 
+    /// <summary>Seconds the menu is up for (vote), shown as a bar in the Panorama menu. 0 = no bar.</summary>
+    public float TimeLimit { get; set; }
+
     public WasdMenu(string title) => Title = title;
 
     public void Add(string display, Action<CCSPlayerController, WasdMenuOption> onChoose) =>

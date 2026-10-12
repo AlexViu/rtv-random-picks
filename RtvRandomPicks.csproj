@@ -10,6 +10,13 @@
     <PackageReference Include="CounterStrikeSharp.API" Version="1.0.367" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Optional: RandomPicksHud's shared API (shared/RandomPicksHudApi on the server), never copied next to the plugin -->
+    <Reference Include="RandomPicksHudApi">
+      <HintPath>lib\RandomPicksHudApi.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
     <None Update="lang\**\*.*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

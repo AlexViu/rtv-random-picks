@@ -24,12 +24,25 @@ public class WasdMenuManager
 
     private readonly Dictionary<int, OpenMenuState> _open = new();
 
+    /// <summary>Use the RandomPicksHud Panorama menu when it is available (UsePanoramaMenu).</summary>
+    public bool UsePanorama { get; set; }
+
+    // Menus shown through RandomPicksHud instead: slot -> (menu, its Panorama handle)
+    private readonly Dictionary<int, (WasdMenu Menu, object Handle)> _panorama = new();
+
     /// <param name="freeze">Hold the player in place while the menu is open, so W/S only scroll.</param>
     public void Open(CCSPlayerController player, WasdMenu menu, bool freeze)
     {
         if (menu.Options.Count == 0) return;
 
         Close(player);
+        int slot = player.Slot;
+        if (UsePanorama && PanoramaMenu.TryOpen(player, menu, freeze, () => _panorama.Remove(slot)) is { } handle)
+        {
+            _panorama[slot] = (menu, handle);
+            return;
+        }
+
         var state = new OpenMenuState { Player = player, Menu = menu, Buttons = player.Buttons, Frozen = freeze };
         _open[player.Slot] = state;
         if (freeze) SetMoveType(player, MoveType_t.MOVETYPE_NONE);
@@ -38,6 +51,11 @@ public class WasdMenuManager
 
     public void Close(CCSPlayerController player)
     {
+        if (_panorama.Remove(player.Slot))
+        {
+            PanoramaMenu.Close(player);
+            return;
+        }
         if (!_open.Remove(player.Slot, out var state)) return;
         if (!player.IsValid) return;
         if (state.Frozen) SetMoveType(player, MoveType_t.MOVETYPE_WALK);
@@ -45,12 +63,19 @@ public class WasdMenuManager
     }
 
     /// <summary>Forgets a disconnected player without touching the (now invalid) controller.</summary>
-    public void Remove(int slot) => _open.Remove(slot);
+    public void Remove(int slot)
+    {
+        _open.Remove(slot);
+        _panorama.Remove(slot);
+    }
 
     public void CloseAll()
     {
         foreach (var state in _open.Values.ToList())
             Close(state.Player);
+        foreach (var slot in _panorama.Keys.ToList())
+            if (Utilities.GetPlayerFromSlot(slot) is { IsValid: true } player) Close(player);
+            else _panorama.Remove(slot);
     }
 
     /// <summary>Re-renders open menus, e.g. after a vote count changed.</summary>
@@ -58,6 +83,8 @@ public class WasdMenuManager
     {
         foreach (var state in _open.Values)
             Render(state);
+        foreach (var (slot, (menu, handle)) in _panorama.ToList())
+            if (Utilities.GetPlayerFromSlot(slot) is { IsValid: true } player) PanoramaMenu.Refresh(player, menu, handle);
     }
 
     public void OnTick()

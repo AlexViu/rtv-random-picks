@@ -55,4 +55,9 @@ public class RtvConfig : BasePluginConfig
     /// e.g. collection maps that should only be played when an admin changes to them.</summary>
     [JsonPropertyName("ExcludedMaps")]
     public List<string> ExcludedMaps { get; set; } = [];
+
+    /// <summary>Draw the menus with the RandomPicksHud Panorama menu (needs the HUD layout in the Workshop pack).
+    /// Falls back to the center-screen menu when RandomPicksHud is not loaded or has menus turned off.</summary>
+    [JsonPropertyName("UsePanoramaMenu")]
+    public bool UsePanoramaMenu { get; set; } = false;
 }
