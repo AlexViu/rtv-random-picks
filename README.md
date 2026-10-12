@@ -120,7 +120,6 @@ Edita `configs/plugins/RtvRandomPicks/RtvRandomPicks.json` y cambia de mapa para
 | `WorkshopCollectionId` | `""` | Colección de Workshop (vacío = `host_workshop_collection`) |
 | `WorkshopCacheHours` | `24` | Horas de validez de la caché de la colección |
 | `ExcludedMaps` | `[]` | Mapas que no salen en RTV, nominaciones ni votaciones (nombre, nombre visible o ID de workshop), p. ej. mapas de la colección que solo pone un admin a mano |
-| `UsePanoramaMenu` | `false` | Dibuja los menús con el menú Panorama de [RandomPicksHud](https://github.com/josesilvaruiz/RandomPicksHud) (ver abajo) |
 
 ### 6. Usarlo en el juego
 
@@ -153,9 +152,9 @@ Junto a cada opción se ve el número de votos en tiempo real. El menú de votac
 
 **Menú Panorama (opcional)**
 
-Con `"UsePanoramaMenu": true` los menús se dibujan con el menú Panorama de RandomPicksHud: un panel a la izquierda con el voto resaltado, los votos a la derecha y una barra con el tiempo que queda de votación. Teclas: **W/S** moverse, **E** elegir (también **espacio** en `!nominate`, que congela), **A/D** cambiar de página, **R** o **Tab** cerrar.
+Si el servidor tiene [RandomPicksHud](https://github.com/josesilvaruiz/RandomPicksHud) 1.2.0 o superior con los menús activados (`EnableMenus`), los menús se dibujan con su menú Panorama: un panel con el voto resaltado, los votos a la derecha y una barra con el tiempo que queda de votación. Las teclas y el aspecto son los de la config de RandomPicksHud (por defecto **W/S** moverse, **E** elegir, también **espacio** en `!nominate`, **A/D** cambiar de página, **R** o **Tab** cerrar).
 
-Requisitos: RandomPicksHud 1.2.0 o superior con su `shared/RandomPicksHudApi/RandomPicksHudApi.dll`, y el layout de la HUD con el menú publicado en el pack de Workshop que descargan los jugadores. Si RandomPicksHud no está cargado, tiene `EnableMenus` en `false` o la HUD no es para ese jugador (`OnlyForSteamIds`), se usa el menú de centro de pantalla de siempre. Déjalo en `false` hasta que el pack con el layout nuevo esté publicado: sin él los jugadores no verían el menú.
+Se usa el menú de centro de pantalla de siempre si RandomPicksHud no está instalado o no está cargado, si tiene `EnableMenus` en `false`, si la HUD no es para ese jugador o si `RtvRandomPicks` está en su `MenuExcludedPlugins`. Sin RandomPicksHud no cambia nada.
 
 Para compilar hace falta `lib/RandomPicksHudApi.dll` (se compila desde el repo de RandomPicksHud, carpeta `api/`); no se copia junto al plugin.
 

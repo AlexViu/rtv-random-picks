@@ -10,6 +10,9 @@ namespace RtvRandomPicks;
 /// </summary>
 internal static class PanoramaMenu
 {
+    // ModuleName, so servers can send this plugin back to its own menu (MenuExcludedPlugins in RandomPicksHud)
+    private const string PluginName = "RtvRandomPicks";
+
     /// <returns>A handle for <see cref="Refresh"/>, or null to use the center-screen menu.</returns>
     public static object? TryOpen(CCSPlayerController player, WasdMenu menu, bool freeze, Action onClose)
     {
@@ -35,7 +38,7 @@ internal static class PanoramaMenu
     private static object? Open(CCSPlayerController player, WasdMenu menu, bool freeze, Action onClose)
     {
         var api = IRpMenuApi.Capability.Get();
-        if (api is null || !api.IsEnabled(player)) return null;
+        if (api is null || !api.IsEnabled(player, PluginName)) return null;
 
         var rp = new RpMenu(menu.Title) { Freeze = freeze, TimeLimit = menu.TimeLimit, OnClose = _ => onClose() };
         foreach (var option in menu.Options)

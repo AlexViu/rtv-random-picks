@@ -24,9 +24,6 @@ public class WasdMenuManager
 
     private readonly Dictionary<int, OpenMenuState> _open = new();
 
-    /// <summary>Use the RandomPicksHud Panorama menu when it is available (UsePanoramaMenu).</summary>
-    public bool UsePanorama { get; set; }
-
     // Menus shown through RandomPicksHud instead: slot -> (menu, its Panorama handle)
     private readonly Dictionary<int, (WasdMenu Menu, object Handle)> _panorama = new();
 
@@ -37,7 +34,7 @@ public class WasdMenuManager
 
         Close(player);
         int slot = player.Slot;
-        if (UsePanorama && PanoramaMenu.TryOpen(player, menu, freeze, () => _panorama.Remove(slot)) is { } handle)
+        if (PanoramaMenu.TryOpen(player, menu, freeze, () => _panorama.Remove(slot)) is { } handle)
         {
             _panorama[slot] = (menu, handle);
             return;

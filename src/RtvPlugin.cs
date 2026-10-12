@@ -51,11 +51,7 @@ public class RtvPlugin : BasePlugin, IPluginConfig<RtvConfig>
     // Maps we changed to, oldest first; the last one is the current map. Survives map changes.
     private readonly List<string> _recent = new();
 
-    public void OnConfigParsed(RtvConfig config)
-    {
-        Config = config;
-        _menu.UsePanorama = config.UsePanoramaMenu;
-    }
+    public void OnConfigParsed(RtvConfig config) => Config = config;
 
     public override void Load(bool hotReload)
     {
