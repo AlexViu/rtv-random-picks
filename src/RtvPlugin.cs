@@ -51,7 +51,11 @@ public class RtvPlugin : BasePlugin, IPluginConfig<RtvConfig>
     // Maps we changed to, oldest first; the last one is the current map. Survives map changes.
     private readonly List<string> _recent = new();
 
-    public void OnConfigParsed(RtvConfig config) => Config = config;
+    public void OnConfigParsed(RtvConfig config)
+    {
+        Config = config;
+        _menu.UsePanorama = config.UsePanoramaMenu;
+    }
 
     public override void Load(bool hotReload)
     {
@@ -318,7 +322,7 @@ public class RtvPlugin : BasePlugin, IPluginConfig<RtvConfig>
         _votes.Clear();
         _voted.Clear();
 
-        var menu = new WasdMenu(Localizer["vote.menu_title"]);
+        var menu = new WasdMenu(Localizer["vote.menu_title"]) { TimeLimit = Config.VoteSeconds };
         foreach (var key in candidates)
             AddVoteOption(menu, key, _maps.DisplayName(key));
 
